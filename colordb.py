@@ -1,8 +1,21 @@
+# -*- coding: utf-8 -*-
+#
+#  colordb.py
+#  colordb
+#
+
+"""
+A database for perceptually nearest neighbour color searches. Indexes basic
+(id, [color1, color2, ...]) records for later retrieval by approximate color
+search.
+"""
+
+import json
+
 from flask import Flask
 from flask import request
 from rtree import index
 from colormath.color_objects import RGBColor
-import json
 
 
 p = index.Property()
@@ -20,7 +33,7 @@ def hex_to_rgb(hex):
 def insert(color, entry):
     lab = color.convert_to('lab')
     idx.insert(entry, (lab.lab_l, lab.lab_a, lab.lab_b, lab.lab_l, lab.lab_a, lab.lab_b))
-    
+
 def nearest(color):
     lab = color.convert_to('lab')
     return idx.nearest((lab.lab_l, lab.lab_a, lab.lab_b, lab.lab_l, lab.lab_a, lab.lab_b), 50)
@@ -41,8 +54,9 @@ def insert_entry():
     entryid = int(request.args.get('entryid'))
     for color in request.args.get('colors','').split(','):
         insert(hex_to_rgb(color), entryid)
-        
+
     return json.dumps('ok')
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', debug=True)
+
